@@ -134,6 +134,7 @@ class OverallSkill extends Skill {
 class DifficultyCalculator {
 
   calculate(columnCount, notes) {
+    if (notes.length == 0) return 0;
     notes = notes.sort((a, b) => a.time - b.time);
 
     let objects = [];
