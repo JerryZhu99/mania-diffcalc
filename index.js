@@ -43,8 +43,11 @@ async function loadFolderNested(outerFolderName) {
 
     let results = maps.map(e => ({
       metadata: e.metadata,
+      columnCount: e.columnCount,
+      lnPercent: e.lnPercent,
+      length: e.length,
       oldRating: stableDifficulty.calculateDifficulty(e.columnCount, e.notes),
-      newRating: reworkDifficulty.calculateDifficulty(e.columnCount, e.notes, getTimingWindow(e.OD)),
+      newRating: reworkDifficulty.calculateDifficulty(e.columnCount, e.notes, getTimingWindow(e.overallDifficulty)),
     }));
 
     await fs.writeFile(`output/${folder}.json`, JSON.stringify(results));

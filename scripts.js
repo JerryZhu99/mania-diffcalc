@@ -66,6 +66,17 @@ const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${t
   const tableData = [].concat(...mapData.map(e => toTableData(...e)));
   const ratingFormatter = e => e?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const durationFormatter = duration => {
+    const pad = n => ('00' + n).slice(-2);
+    const ms = duration % 1000;
+    duration = (duration - ms) / 1000;
+    const secs = duration % 60;
+    duration = (duration - secs) / 60;
+    const mins = duration % 60;
+    const hrs = (duration - mins) / 60;
+    return hrs > 0 ? `${hrs}:${pad(mins)}:${pad(secs)}` : `${mins}:${pad(secs)}`;
+  }
+
   const difficultyTable = $('#difficulty-table');
   let highlightRows = false;
 
@@ -74,6 +85,7 @@ const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${t
     search: true,
     searchTimeOut: 0,
     showFullscreen: "true",
+    showColumns: "true",
     buttons: () => ({
       btnAdd: {
         text: 'Highlight changes',
@@ -101,6 +113,22 @@ const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${t
       sortable: true,
       formatter: formatMetadata,
     }, {
+      field: 'columnCount',
+      title: 'Keys',
+      sortable: true,
+    }, {
+      field: 'length',
+      title: 'Length',
+      sortable: true,
+      align: 'right',
+      halign: 'right',
+      formatter: durationFormatter,
+    }, {
+      field: 'lnPercent',
+      title: 'LN %',
+      sortable: true,
+      formatter: e => `${(e * 100)?.toFixed(0)}%`,
+    }, {
       field: 'oldRating',
       title: 'Old SR',
       sortable: true,
@@ -119,6 +147,7 @@ const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${t
       field: 'group',
       title: 'Group',
       sortable: true,
+      visible: false,
     }],
   })
 

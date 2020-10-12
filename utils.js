@@ -11,7 +11,9 @@ function parseBeatmap(data) {
   const artist = getProperty("Artist:");
   const creator = getProperty("Creator:");
   const version = getProperty("Version:");
-  const OD = parseFloat(getProperty("OverallDifficulty:"));
+  const beatmapId = getProperty("BeatmapID:");
+  const beatmapSetId = getProperty("BeatmapSetID:");
+  const overallDifficulty = parseFloat(getProperty("OverallDifficulty:"));
   const columnCount = parseFloat(getProperty("CircleSize:"));
 
   let objectIndex = lines.indexOf('[HitObjects]');
@@ -33,12 +35,17 @@ function parseBeatmap(data) {
       let column = Math.floor(x * columnCount / 512);
       return { time, endTime, column, isLN };
     });
+
+  const lnPercent = notes.filter(e => e.isLN).length / Math.max(1, notes.length);
+  const length = notes.length === 0 ? 0 : notes[notes.length - 1].endTime - notes[0].time;
   return {
     metadata: {
-      title, artist, creator, version
+      title, artist, creator, version, beatmapId, beatmapSetId
     },
-    OD,
+    overallDifficulty,
     columnCount,
+    lnPercent,
+    length,
     notes,
   };
 }
