@@ -30,6 +30,7 @@ async function loadFolderNested(outerFolderName) {
     'farm',
     'random',
     'ln',
+    'chordjack',
     'testing',
     'dans',
     'player0',

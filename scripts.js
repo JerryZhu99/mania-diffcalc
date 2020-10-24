@@ -6,6 +6,7 @@ const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${t
     'farm',
     'random',
     'ln',
+    'chordjack',
     'testing',
     'dans',
     'player0',

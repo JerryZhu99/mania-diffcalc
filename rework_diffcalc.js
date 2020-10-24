@@ -1,14 +1,14 @@
 
 const parameters = {
   BASE_STRAIN: 0.7,
-  NOTE_STRAIN: 0.98 * 1000,
-  LN_RELEASE_FACTOR: 0.65,
+  NOTE_STRAIN: 1.3 * 1000,
+  LN_RELEASE_FACTOR: 0.60,
   STAMINA_HALF_LIFE: 1000,
   STAMINA_STRAIN_FACTOR: 0.016,
-  CHORD_REDUCTION_FACTOR: 0.15,
-  JACK_REDUCTION_FACTOR: 0.4,
-  LN_LONG_BONUS: 0.15,
-  LN_SHORT_THRESHOLD: 90,
+  CHORD_REDUCTION_FACTOR: 0.0,
+  JACK_REDUCTION_FACTOR: 0.6,
+  LN_LONG_BONUS: 0.2,
+  LN_SHORT_THRESHOLD: 100,
   LN_SHORT_BONUS: 0.4,
 };
 
@@ -68,15 +68,14 @@ function calculateDifficulty(columns, notes, timingWindow) {
         currentNote.staminaFactor = 0;
         currentNote.fingerStrain = baseStrain;
       }
-
-      currentNote.strain = currentNote.fingerStrain;
     }
   }
 
   const computeWristStrains = (handColumns) => {
     let handNotes = notes.filter(e => handColumns.includes(e.column));
-    let lastEnd = new Array(columns).fill(0);
+    let maxDeltas = new Array(columns).fill(0);
 
+    /*
     for (let i = 0; i < handNotes.length; i++) {
       // Chords are not finger strains
       for (let j = i + 1; j < handNotes.length; j++) {
@@ -91,15 +90,24 @@ function calculateDifficulty(columns, notes, timingWindow) {
         }
       }
     }
+    */
 
     for (let i = 0; i < handNotes.length; i++) {
       // Reduce strain for wristjacks
-      if (handNotes[i].prev) {
-        const delta = Math.max(timingWindow[2], handNotes[i].time - Math.max(...lastEnd));
-        const deltaColumn = handNotes[i].time - handNotes[i].prev.endTime;
-        handNotes[i].strain *= 1 - parameters.JACK_REDUCTION_FACTOR * delta / deltaColumn;
+      if (i > 0) {
+        const delta = Math.max(0, handNotes[i].time - handNotes[i - 1].time);
+        for (let c = 0; c < columns; c++) {
+          maxDeltas[c] = Math.max(delta, maxDeltas[c]);
+        }
       }
-      lastEnd[handNotes[i].column] = handNotes[i].endTime;
+      if (handNotes[i].prev) {
+        const maxDelta = maxDeltas[handNotes[i].column] + timingWindow[1];
+        const deltaColumn = handNotes[i].time - handNotes[i].prev.endTime;
+        const emptyRatio = Math.min(1, (maxDelta / deltaColumn));
+        const reductionFactor = 1 - parameters.JACK_REDUCTION_FACTOR * (Math.max(0, 2 * emptyRatio - 1));
+        handNotes[i].jackFactor = Math.min(handNotes[i].jackFactor || 1, reductionFactor);
+      }
+      maxDeltas[handNotes[i].column] = 0;
     }
   }
   // Left hand
@@ -116,8 +124,16 @@ function calculateDifficulty(columns, notes, timingWindow) {
   }
   computeWristStrains(rightHandColumns);
 
+  // Final strain
+  for (let currentNote of notes) {
+    currentNote.strain = currentNote.fingerStrain;
+    if (currentNote.jackFactor !== undefined) {
+      currentNote.strain *= currentNote.jackFactor;
+    }
+  }
+
   // Average of exponentials
-  const averageStrain = Math.log(notes.map(e => Math.exp(e.strain)).reduce((a, b) => a + b, 0) / notes.length);
+  const averageStrain = Math.log2(notes.map(e => 2 ** e.strain).reduce((a, b) => a + b, 0) / notes.length);
   //const averageStrain = notes.map(e => (e.strain)).reduce((a, b) => a + b) / notes.length;
 
   return averageStrain;
