@@ -1,10 +1,10 @@
 const { promises: fs, lstatSync } = require('fs');
 const path = require('path');
 
-const { parseBeatmap, getTimingWindow } = require('./utils');
+const { parseBeatmap, getTimingWindow } = require('./src/utils');
 
-const reworkDifficulty = require('./rework_diffcalc');
-const stableDifficulty = require('./stable_diffcalc');
+const reworkDifficulty = require('./src/rework_diffcalc');
+const stableDifficulty = require('./src/stable_diffcalc');
 
 async function loadBeatmap(fileName) {
   const file = await fs.readFile(fileName, { encoding: 'utf-8' });

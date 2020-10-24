@@ -22,14 +22,18 @@
     defer></script>
   <script src="https://unpkg.com/bootstrap-table@1.18.0/dist/bootstrap-table.min.js" defer></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js" defer></script>
-  <script src="scripts.js" defer></script>
+  <script src="dist/main.js" defer></script>
 </head>
 
 <body>
   <div class="container mb-5">
     <h1>Player0's Experimental osu!mania SR rework</h1>
 
-    <div id="difficulty-scatter"></canvas>
+    <div id="difficulty-scatter">
+    </div>
+    <div class="custom-file">
+      <input type="file" class="custom-file-input" id="osu-upload">
+      <label class="custom-file-label" for="osu-upload">Upload .osu</label>
     </div>
     <table id="difficulty-table">
 

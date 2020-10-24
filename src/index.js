@@ -1,21 +1,27 @@
 
+
+const reworkDifficulty = require('./rework_diffcalc');
+const stableDifficulty = require('./stable_diffcalc');
+const { parseBeatmap, getTimingWindow } = require('./utils');
+
 const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${title} (${creator}) [${version}]`;
 
 (async () => {
   const dataSets = [
     'farm',
-    'random',
+    // 'random',
     'ln',
     'chordjack',
-    'testing',
+    // 'testing',
     'dans',
     'player0',
-    'bringobrango',
+    // 'bringobrango',
     'vibro',
     'ranked',
   ]
 
-  const mapData = await Promise.all(dataSets.map(async e => [await (await fetch(`/output/${e}.json`)).json(), e]));
+  let mapData = await Promise.all(dataSets.map(async e => [await (await fetch(`/output/${e}.json`)).json(), e]));
+  mapData.push([[], 'custom'])
 
   const toPlotData = (data, name) => ({
     x: data.map(e => e.oldRating),
@@ -152,5 +158,27 @@ const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${t
     }],
   })
 
+  const osuUpload = document.getElementById('osu-upload');
+  osuUpload.addEventListener('change', () => {
+    const file = osuUpload.files[0];
+    const fr = new FileReader();
+    fr.addEventListener('load', () => {
+      const rawData = fr.result;
+      const map = parseBeatmap(rawData);
+      const oldRating = stableDifficulty.calculateDifficulty(map.columnCount, map.notes);
+      const newRating = reworkDifficulty.calculateDifficulty(map.columnCount, map.notes, getTimingWindow(map.columnCount));
+      const metadata = formatMetadata(map.metadata);
+      const customPlot = plotData.find(e => e.name == 'custom');
+
+      customPlot.x.push(oldRating);
+      customPlot.y.push(newRating);
+      customPlot.text.push(metadata);
+
+      Plotly.redraw('difficulty-scatter');
+
+      difficultyTable.bootstrapTable('append', toTableData([{ ...map, oldRating, newRating }], 'custom'))
+    });
+    fr.readAsText(file);
+  });
 
 })();
