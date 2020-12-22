@@ -1,3 +1,4 @@
+const { getTimingWindow } = require("./utils");
 
 const parameters = {
   BASE_STRAIN: 0.7,
@@ -139,6 +140,11 @@ function calculateDifficulty(columns, notes, timingWindow) {
   return averageStrain;
 }
 
+function calculate(map) {
+  return calculateDifficulty(map.columnCount, map.notes, getTimingWindow(map.overallDifficulty));
+}
+
 module.exports = {
   calculateDifficulty,
+  calculate,
 }

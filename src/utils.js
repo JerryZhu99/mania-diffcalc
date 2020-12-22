@@ -66,8 +66,10 @@ function getTimingWindow(od, mods = "") {
   return result;
 }
 
+const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${title} (${creator}) [${version}]`;
 
 module.exports = {
   parseBeatmap,
   getTimingWindow,
+  formatMetadata,
 }

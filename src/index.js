@@ -2,9 +2,7 @@
 
 const reworkDifficulty = require('./rework_diffcalc');
 const stableDifficulty = require('./stable_diffcalc');
-const { parseBeatmap, getTimingWindow } = require('./utils');
-
-const formatMetadata = ({ artist, title, creator, version }) => `${artist} - ${title} (${creator}) [${version}]`;
+const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
 
 (async () => {
   const dataSets = [

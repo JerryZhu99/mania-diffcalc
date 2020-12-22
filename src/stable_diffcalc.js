@@ -212,6 +212,11 @@ function calculateDifficulty(columnCount, notes, timingWindow) {
   return new DifficultyCalculator().calculate(columnCount, notes)
 }
 
+function calculate(map) {
+  return calculateDifficulty(map.columnCount, map.notes);
+}
+
 module.exports = {
-  calculateDifficulty
+  calculateDifficulty,
+  calculate,
 };
