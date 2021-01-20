@@ -18,7 +18,12 @@ const stableDifficulty = require('./src/stable_diffcalc');
     'player0',
     'bringobrango',
     'vibro',
-    'ranked',
+    'ranked-4k',
+    'ranked-5k',
+    'ranked-6k',
+    'ranked-7k',
+    'ranked-8k',
+    'ranked-9k',
   ]
 
   for (let folder of folders) {
