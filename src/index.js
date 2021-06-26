@@ -12,7 +12,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     'chordjack',
     // 'testing',
     'dans',
-    'player0',
+    // 'player0',
     // 'bringobrango',
     'vibro',
     'ranked-4k',
@@ -37,14 +37,17 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
   const layout = {
     title: 'osu! reworked SR',
     xaxis: {
+      title: 'New SR',
       rangemode: 'nonnegative',
       constrain: 'range',
     },
     yaxis: {
+      title: 'Old SR',
       scaleanchor: 'x',
       scaleratio: 1,
     },
     height: 800,
+    hovermode: 'closest',
     shapes: [
       {
         type: 'line',
@@ -60,7 +63,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     ]
   };
 
-  Plotly.newPlot('difficulty-scatter', plotData, layout);
+  Plotly.newPlot('difficulty-scatter', plotData, layout, { displaylogo: false });
 
   const toTableData = (data, name) => data.map(e => ({
     name: formatMetadata(e.metadata),

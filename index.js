@@ -15,8 +15,8 @@ const stableDifficulty = require('./src/stable_diffcalc');
     'chordjack',
     'testing',
     'dans',
-    'player0',
-    'bringobrango',
+    // 'player0',
+    // 'bringobrango',
     'vibro',
     'ranked-4k',
     'ranked-5k',
@@ -28,9 +28,10 @@ const stableDifficulty = require('./src/stable_diffcalc');
 
   for (let folder of folders) {
     let maps = await loadFolder(path.join('data', folder));
+    console.log(`processing ${folder} (${maps.length})`)
 
     let results = maps
-      // .filter(e => !folder.startsWith('ranked') || Math.random() < 0.2)
+      .filter(e => !folder.startsWith('ranked') || Math.random() < 0.2)
       .map(e => ({
         metadata: e.metadata,
         columnCount: e.columnCount,

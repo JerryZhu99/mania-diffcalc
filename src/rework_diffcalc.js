@@ -2,16 +2,16 @@ const { getTimingWindow } = require("./utils");
 
 const parameters = {
   BASE_STRAIN: 0.0,
-  STRAIN_FACTOR: 6.0,
+  STRAIN_FACTOR: 1.5,
   NOTE_STRAIN: 1.2 * 1000,
   LN_RELEASE_FACTOR: 0.60,
-  STAMINA_HALF_LIFE: 1000,
-  STAMINA_STRAIN_FACTOR: 0.016,
+  STAMINA_HALF_LIFE: 4000,
+  STAMINA_STRAIN_FACTOR: 0.5,
   JACK_REDUCTION_FACTOR: 0.6,
-  LN_LONG_BONUS: 0.2,
   LN_SHORT_THRESHOLD: 100,
-  LN_SHORT_BONUS: 0.4,
-  NEIGHBOURHOOD_SIZE: 200, //ms
+  LN_SHORT_BONUS: 0.8,
+  LN_LONG_BONUS: 0.5,
+  NEIGHBOURHOOD_SIZE: 400, //ms
   DEVIATION_WEIGHT: 0.75,
 };
 
@@ -130,6 +130,12 @@ function calculateStrains(columns, notes, timingWindow) {
     strain = max * (1 - parameters.DEVIATION_WEIGHT) + deviation * parameters.DEVIATION_WEIGHT;
 
     currentNote.strain = parameters.BASE_STRAIN + parameters.STRAIN_FACTOR * strain * (1 + strainBonus);
+
+    if (previousNote && previousNote.strain) {
+      const timeDiff = currentNote.time - previousNote.time;
+      const currentStaminaStrain = (2 ** (-timeDiff / parameters.STAMINA_HALF_LIFE)) * previousNote.strain;
+      currentNote.strain += currentStaminaStrain * parameters.STAMINA_STRAIN_FACTOR;
+    }
   }
 }
 
@@ -141,8 +147,8 @@ function calculateDifficulty(columns, notes, timingWindow) {
   calculateStrains(columns, notes.filter(e => e.column < Math.floor(columns / 2)), timingWindow);
   calculateStrains(columns, notes.filter(e => e.column >= Math.floor(columns / 2)), timingWindow);
 
-  // Average of exponentials
-  const averageStrain = Math.sqrt(notes.map(e => e.strain ** 2).reduce((a, b) => a + b, 0) / notes.length);
+  // Weighted average
+  const averageStrain = (notes.map(e => e.strain ** 6).reduce((a, b) => a + b, 0) / notes.length) ** (1 / 6);
   //const averageStrain = notes.map(e => (e.strain)).reduce((a, b) => a + b) / notes.length;
 
   return averageStrain;
