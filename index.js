@@ -31,7 +31,7 @@ const stableDifficulty = require('./src/stable_diffcalc');
     console.log(`processing ${folder} (${maps.length})`)
 
     let results = maps
-      .filter(e => !folder.startsWith('ranked') || Math.random() < 0.2)
+      // .filter(e => !folder.startsWith('ranked') || Math.random() < 0.2)
       .map(e => ({
         metadata: e.metadata,
         columnCount: e.columnCount,
