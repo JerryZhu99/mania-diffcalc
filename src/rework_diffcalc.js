@@ -1,7 +1,8 @@
 const { getTimingWindow } = require("./utils");
 
 const parameters = {
-  BASE_STRAIN: 0.7,
+  BASE_STRAIN: 0.0,
+  STRAIN_FACTOR: 6.0,
   NOTE_STRAIN: 1.2 * 1000,
   LN_RELEASE_FACTOR: 0.60,
   STAMINA_HALF_LIFE: 1000,
@@ -10,6 +11,8 @@ const parameters = {
   LN_LONG_BONUS: 0.2,
   LN_SHORT_THRESHOLD: 100,
   LN_SHORT_BONUS: 0.4,
+  NEIGHBOURHOOD_SIZE: 200, //ms
+  DEVIATION_WEIGHT: 0.75,
 };
 
 const lerp = (a, b, t) => (a * (1 - t) + b * t)
@@ -46,6 +49,11 @@ function preprocessNotes(columns, notes) {
     }
     maxDeltas[note.column] = 0;
   }
+
+  // Neighbourhood
+  for (let i = 0; i < notes.length; i++) {
+    notes[i].neighbours = notes.filter(note => Math.abs(note.time - notes[i].time) < parameters.NEIGHBOURHOOD_SIZE);
+  }
 }
 
 function calculateStrains(columns, notes, timingWindow) {
@@ -77,32 +85,51 @@ function calculateStrains(columns, notes, timingWindow) {
       }
     }
 
-    if (!previousNoteColumn) {
-      currentNote.strainStaminaFactor = 0;
-      currentNote.strain = parameters.BASE_STRAIN;
-      currentNote.strain *= (1 + strainBonus);
-      continue;
+    // if (!previousNoteColumn) {
+    //   currentNote.strainStaminaFactor = 0;
+    //   currentNote.strain = parameters.BASE_STRAIN;
+    //   currentNote.strain *= (1 + strainBonus);
+    //   continue;
+    // }
+
+    // // Wrist (jack)
+    // let cappedColumnDelta = Math.max(columnDelta, timingWindow[1]);
+    // let wristStrain = parameters.NOTE_STRAIN / cappedColumnDelta + parameters.BASE_STRAIN;
+
+    // const emptyRatio = Math.min(1, (handDelta / columnDelta));
+    // const reductionFactor = 1 - parameters.JACK_REDUCTION_FACTOR * (Math.max(0, 2 * emptyRatio - 1));
+
+    // wristStrain *= reductionFactor;
+
+    // let strain = wristStrain
+
+    // // Stamina decays exponentially
+    // const staminaStrain = (2 ** (-columnDelta / parameters.STAMINA_HALF_LIFE)) * previousNoteColumn.strainStaminaFactor;
+    // strain += staminaStrain;
+    // currentNote.strainStaminaFactor = staminaStrain + parameters.STAMINA_STRAIN_FACTOR * wristStrain;
+
+    // strain *= (1 + strainBonus);
+
+    let strain = 0;
+
+    let columnDensities = []
+    for (let i = 0; i < columns; i++) {
+      let notes = currentNote.neighbours.filter(e => e.column == i);
+      columnDensities[i] = notes
+        .map(note => {
+          let delta = Math.abs(note.time - currentNote.time);
+          let weight = (parameters.NEIGHBOURHOOD_SIZE - delta) / parameters.NEIGHBOURHOOD_SIZE
+          return Math.sqrt(weight);
+        })
+        .reduce((a, b) => a + b, 0);
     }
 
-    // Wrist (jack)
-    let cappedColumnDelta = Math.max(columnDelta, timingWindow[1]);
-    let wristStrain = parameters.NOTE_STRAIN / cappedColumnDelta + parameters.BASE_STRAIN;
+    const mean = columnDensities.reduce((a, b) => a + b, 0);
+    const max = Math.max(...columnDensities)
+    const deviation = Math.sqrt(columnDensities.map(e => e * (max - e)).reduce((a, b) => a + b, 0));
+    strain = max * (1 - parameters.DEVIATION_WEIGHT) + deviation * parameters.DEVIATION_WEIGHT;
 
-    const emptyRatio = Math.min(1, (handDelta / columnDelta));
-    const reductionFactor = 1 - parameters.JACK_REDUCTION_FACTOR * (Math.max(0, 2 * emptyRatio - 1));
-
-    wristStrain *= reductionFactor;
-
-    let strain = wristStrain
-
-    // Stamina decays exponentially
-    const staminaStrain = (2 ** (-columnDelta / parameters.STAMINA_HALF_LIFE)) * previousNoteColumn.strainStaminaFactor;
-    strain += staminaStrain;
-    currentNote.strainStaminaFactor = staminaStrain + parameters.STAMINA_STRAIN_FACTOR * wristStrain;
-
-    strain *= (1 + strainBonus);
-
-    currentNote.strain = strain;
+    currentNote.strain = parameters.BASE_STRAIN + parameters.STRAIN_FACTOR * strain * (1 + strainBonus);
   }
 }
 
@@ -115,7 +142,7 @@ function calculateDifficulty(columns, notes, timingWindow) {
   calculateStrains(columns, notes.filter(e => e.column >= Math.floor(columns / 2)), timingWindow);
 
   // Average of exponentials
-  const averageStrain = Math.log2(notes.map(e => 2 ** e.strain).reduce((a, b) => a + b, 0) / notes.length);
+  const averageStrain = Math.sqrt(notes.map(e => e.strain ** 2).reduce((a, b) => a + b, 0) / notes.length);
   //const averageStrain = notes.map(e => (e.strain)).reduce((a, b) => a + b) / notes.length;
 
   return averageStrain;
