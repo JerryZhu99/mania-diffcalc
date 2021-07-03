@@ -189,7 +189,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     const layout = {
       title: name,
       xaxis: {
-        title: 'Time (ms)',
+        title: 'Time',
         rangemode: 'nonnegative',
         constrain: 'range',
         tickformat: '%M:%S'

@@ -1,11 +1,11 @@
 const { getTimingWindow } = require("./utils");
 
 const parameters = {
-  STRAIN_FACTOR: 1.20,
+  STRAIN_FACTOR: 1.25,
   STAMINA_HALF_LIFE: 4000,
   STAMINA_STRAIN_FACTOR: 0.5,
   LN_SHORT_THRESHOLD: 100,
-  LN_SHORT_BONUS: 1.25,
+  LN_SHORT_BONUS: 0.25,
   LN_LONG_LOWER_THRESHOLD: 200,
   LN_LONG_UPPER_THRESHOLD: 350,
   LN_LONG_BONUS: 0.75,
@@ -33,8 +33,19 @@ function preprocessNotes(columns, notes) {
   }
 
   // Neighbourhood
+  let startIndex = 0;
   for (let i = 0; i < notes.length; i++) {
-    notes[i].neighbours = notes.filter(note => Math.abs(note.time - notes[i].time) < parameters.NEIGHBOURHOOD_SIZE);
+    // notes[i].neighbours = notes.filter(note => Math.abs(note.time - notes[i].time) < parameters.NEIGHBOURHOOD_SIZE);
+    notes[i].neighbours = []
+    for (let j = startIndex; j < notes.length; j++) {
+      if (notes[j].time < notes[i].time - parameters.NEIGHBOURHOOD_SIZE) {
+        startIndex = j + 1;
+      } else if (notes[j].time > notes[i].time + parameters.NEIGHBOURHOOD_SIZE) {
+        break;
+      } else {
+        notes[i].neighbours.push(notes[j])
+      }
+    }
   }
 }
 
