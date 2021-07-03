@@ -165,6 +165,46 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     }],
   })
 
+
+  const plotStrains = (name, notes) => {
+    const getPlotData = (name) => ({
+      x: notes.map(e => new Date(e.time)),
+      y: notes.map(e => e[name]),
+      mode: 'markers',
+      type: 'scatter',
+      name: name,
+      text: notes.map(e => e.time + "|" + e.column),
+      marker: {
+        size: 4,
+        opacity: 0.5,
+      },
+    })
+
+    const plotData = [
+      getPlotData('strain'),
+      getPlotData('longNoteBonus'),
+      getPlotData('staminaBonus'),
+    ]
+
+    const layout = {
+      title: name,
+      xaxis: {
+        title: 'Time (ms)',
+        rangemode: 'nonnegative',
+        constrain: 'range',
+        tickformat: '%M:%S'
+      },
+      yaxis: {
+        title: 'Strain',
+        dtick: 1,
+      },
+      height: 400,
+      hovermode: 'closest',
+    };
+
+    Plotly.newPlot('difficulty-graph', plotData, layout, { displaylogo: false });
+  }
+
   const osuUpload = document.getElementById('osu-upload');
   osuUpload.addEventListener('change', () => {
     const file = osuUpload.files[0];
@@ -184,6 +224,8 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
       Plotly.redraw('difficulty-scatter');
 
       difficultyTable.bootstrapTable('append', toTableData([{ ...map, oldRating, newRating }], 'custom'))
+
+      plotStrains(metadata, map.notes)
     });
     fr.readAsText(file);
   });
