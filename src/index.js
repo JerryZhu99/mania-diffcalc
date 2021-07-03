@@ -29,7 +29,10 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     type: 'scatter',
     name: name,
     text: data.map(e => formatMetadata(e.metadata)),
-    marker: { size: 12 },
+    marker: {
+      size: 6,
+      opacity: 0.5,
+    },
   })
 
   const plotData = mapData.map(e => toPlotData(...e));
@@ -37,14 +40,16 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
   const layout = {
     title: 'osu! reworked SR',
     xaxis: {
-      title: 'New SR',
+      title: 'Old SR',
       rangemode: 'nonnegative',
       constrain: 'range',
+      dtick: 1,
     },
     yaxis: {
-      title: 'Old SR',
+      title: 'New SR',
       scaleanchor: 'x',
       scaleratio: 1,
+      dtick: 1,
     },
     height: 800,
     hovermode: 'closest',
