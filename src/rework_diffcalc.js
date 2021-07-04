@@ -6,15 +6,16 @@ const parameters = {
   STAMINA_STRAIN_FACTOR: 0.5,
 
   LN_SHORT_BONUS: 0.2,
-  LN_LONG_LOWER_THRESHOLD: 200,
-  LN_LONG_UPPER_THRESHOLD: 300,
+  LN_SHORT_THRESHOLD: 200,
+  LN_LONG_THRESHOLD: 300,
   LN_LONG_BONUS: 0.6,
-  LN_RELEASE_MIN_THRESHOLD: 400,
-  LN_RELEASE_MAX_THRESHOLD: 600,
-  LN_RELEASE_BONUS: 0.4,
 
   LN_INVERSE_MIN_THRESHOLD: 200,
   LN_INVERSE_BONUS: 0.75,
+
+  LN_RELEASE_MIN_THRESHOLD: 400,
+  LN_RELEASE_MAX_THRESHOLD: 600,
+  LN_RELEASE_BONUS: 0.4,
 
   NEIGHBOURHOOD_SIZE: 400, //ms
   DEVIATION_WEIGHT: 0.75,
@@ -127,10 +128,10 @@ function calculateStrains(columns, notes, timingWindow) {
     let longNoteFactor = 0;
     if (currentNote.isLN) {
       let lnLength = currentNote.endTime - currentNote.time;
-      lnLength = Math.max(parameters.LN_LONG_LOWER_THRESHOLD, lnLength);
-      lnLength = Math.min(parameters.LN_LONG_UPPER_THRESHOLD, lnLength);
-      const relativeLength = (lnLength - parameters.LN_LONG_LOWER_THRESHOLD)
-        / (parameters.LN_LONG_UPPER_THRESHOLD - parameters.LN_LONG_LOWER_THRESHOLD);
+      lnLength = Math.max(parameters.LN_SHORT_THRESHOLD, lnLength);
+      lnLength = Math.min(parameters.LN_LONG_THRESHOLD, lnLength);
+      const relativeLength = (lnLength - parameters.LN_SHORT_THRESHOLD)
+        / (parameters.LN_LONG_THRESHOLD - parameters.LN_SHORT_THRESHOLD);
 
       // Give a bonus depending on LN length
       longNoteFactor = relativeLength * parameters.LN_LONG_BONUS + (1 - relativeLength) * parameters.LN_SHORT_BONUS;
