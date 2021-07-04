@@ -29,7 +29,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     x: data.map(e => e.oldRating),
     y: data.map(e => e.newRating),
     mode: 'markers',
-    type: 'scatter',
+    type: 'scattergl',
     name: name,
     text: data.map(e => formatMetadata(e.metadata)),
     marker: {
@@ -71,7 +71,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     ]
   };
 
-  Plotly.newPlot('difficulty-scatter', plotData, layout, { displaylogo: false });
+  Plotly.react('difficulty-scatter', plotData, layout, { displaylogo: false });
 
   const toTableData = (data, name) => data.map(e => ({
     name: formatMetadata(e.metadata),
@@ -174,7 +174,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
       x: notes.map(e => new Date(e.time)),
       y: notes.map(e => e[name]),
       mode: 'markers',
-      type: 'scatter',
+      type: 'scattergl',
       name: name,
       text: notes.map(e => e.time + "|" + e.column),
       marker: {
@@ -185,8 +185,10 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
 
     const plotData = [
       getPlotData('strain'),
+      getPlotData('baseStrain'),
       getPlotData('longNoteBonus'),
       getPlotData('staminaBonus'),
+      getPlotData('releaseCoverage'),
     ]
 
     const layout = {
@@ -205,7 +207,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
       hovermode: 'closest',
     };
 
-    Plotly.newPlot('difficulty-graph', plotData, layout, { displaylogo: false });
+    Plotly.react('difficulty-graph', plotData, layout, { displaylogo: false });
   }
 
   const osuUpload = document.getElementById('osu-upload');
