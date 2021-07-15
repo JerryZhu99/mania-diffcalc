@@ -6,18 +6,10 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
 
 (async () => {
   const dataSets = [
-    'farm',
-    // 'random',
-    // 'ln',
-    // 'chordjack',
-    // 'testing',
     'reform-dans',
     'ln-v2-dans',
     '7k-regular-dans',
     '7k-ln-dans',
-    // 'player0',
-    // 'bringobrango',
-    'vibro',
     'ranked-4k',
     'ranked-7k',
   ]

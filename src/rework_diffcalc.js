@@ -21,15 +21,7 @@ const parameters = {
   DEVIATION_WEIGHT: 0.75,
 };
 
-const lerp = (a, b, t) => (a * (1 - t) + b * t)
-
 function preprocessNotes(columns, notes) {
-  // Per note
-  for (let i = 1; i < notes.length; i++) {
-    notes[i].prev = notes[i - 1];
-    notes[i].delta = notes[i].time - notes[i - 1].time
-  }
-
   // Per finger
   for (let i = 0; i < columns; i++) {
     let columnNotes = notes.filter(e => e.column == i);
@@ -163,8 +155,6 @@ function calculateDifficulty(columns, notes, timingWindow) {
 
   // Weighted average
   const averageStrain = (notes.map(e => e.strain ** 6).reduce((a, b) => a + b, 0) / notes.length) ** (1 / 6);
-  // const averageStrain = (notes.map(e => e.strain ** 4).reduce((a, b) => a + b, 0) / notes.map(e => e.strain ** 3).reduce((a, b) => a + b, 0));
-  //const averageStrain = notes.map(e => (e.strain)).reduce((a, b) => a + b) / notes.length;
 
   return averageStrain;
 }

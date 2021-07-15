@@ -1,4 +1,4 @@
-const { promises: fs } = require('fs');
+const { promises: fs, existsSync } = require('fs');
 const path = require('path');
 
 const { parseBeatmap, getTimingWindow } = require('./src/utils');
@@ -9,32 +9,23 @@ const stableDifficulty = require('./src/stable_diffcalc');
 
 (async () => {
   let folders = [
-    'farm',
-    'random',
-    'ln',
-    'chordjack',
-    'testing',
     'reform-dans',
     'ln-v2-dans',
     '7k-regular-dans',
     '7k-ln-dans',
-    // 'player0',
-    // 'bringobrango',
-    'vibro',
     'ranked-4k',
-    'ranked-5k',
-    'ranked-6k',
     'ranked-7k',
-    'ranked-8k',
-    'ranked-9k',
   ]
+
+  if (!existsSync('output')) {
+    await fs.mkdir('output');
+  }
 
   for (let folder of folders) {
     let maps = await loadFolder(path.join('data', folder));
     console.log(`processing ${folder} (${maps.length})`)
 
     let results = maps
-      // .filter(e => !folder.startsWith('ranked') || Math.random() < 0.2)
       .map(e => ({
         metadata: e.metadata,
         columnCount: e.columnCount,
