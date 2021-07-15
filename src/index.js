@@ -185,6 +185,8 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
 
     const plotData = [
       getPlotData('strain'),
+      getPlotData('maxColumn'),
+      getPlotData('devColumn'),
       getPlotData('baseStrain'),
       getPlotData('longNoteBonus'),
       getPlotData('staminaBonus'),

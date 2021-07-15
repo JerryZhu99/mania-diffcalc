@@ -1,25 +1,24 @@
 const { getTimingWindow } = require("./utils");
 
 const parameters = {
-  STRAIN_FACTOR: 1.25,
+  STRAIN_FACTOR: 1.6,
   STAMINA_HALF_LIFE: 4000,
   STAMINA_STRAIN_FACTOR: 0.5,
 
   LN_SHORT_BONUS: 0.2,
   LN_SHORT_THRESHOLD: 200,
-  LN_LONG_THRESHOLD: 300,
-  LN_LONG_BONUS: 0.6,
+  LN_LONG_THRESHOLD: 500,
+  LN_LONG_BONUS: 0.2,
 
   LN_INVERSE_MIN_THRESHOLD: 200,
-  LN_INVERSE_BONUS: 0.75,
+  LN_INVERSE_BONUS: 0.6,
 
   LN_RELEASE_MIN_THRESHOLD: 400,
   LN_RELEASE_MAX_THRESHOLD: 600,
-  LN_RELEASE_BONUS: 0.4,
+  LN_RELEASE_BONUS: 1,
 
   NEIGHBOURHOOD_SIZE: 400, //ms
   DEVIATION_WEIGHT: 0.75,
-  TOTAL_STRAIN_FACTOR: 0.5,
 };
 
 const lerp = (a, b, t) => (a * (1 - t) + b * t)
@@ -102,17 +101,18 @@ function calculateStrains(columns, notes, timingWindow) {
         .map(note => {
           let delta = Math.abs(note.time - currentNote.time);
           let weight = (parameters.NEIGHBOURHOOD_SIZE - delta) / parameters.NEIGHBOURHOOD_SIZE
-          return Math.sqrt(weight);
+          return parameters.STRAIN_FACTOR * Math.sqrt(weight);
         })
         .reduce((a, b) => a + b, 0);
     }
 
-    const mean = columnDensities.reduce((a, b) => a + b, 0);
     const max = Math.max(...columnDensities)
     const deviation = Math.sqrt(columnDensities.map(e => e * (max - e)).reduce((a, b) => a + b, 0));
     let strain = max * (1 - parameters.DEVIATION_WEIGHT) + deviation * parameters.DEVIATION_WEIGHT;
 
-    currentNote.baseStrain = parameters.STRAIN_FACTOR * strain;
+    currentNote.maxColumn = max;
+    currentNote.devColumn = deviation;
+    currentNote.baseStrain = strain;
 
     // Burst stamina
     currentNote.staminaBonus = 0
@@ -163,16 +163,10 @@ function calculateDifficulty(columns, notes, timingWindow) {
 
   // Weighted average
   const averageStrain = (notes.map(e => e.strain ** 6).reduce((a, b) => a + b, 0) / notes.length) ** (1 / 6);
+  // const averageStrain = (notes.map(e => e.strain ** 4).reduce((a, b) => a + b, 0) / notes.map(e => e.strain ** 3).reduce((a, b) => a + b, 0));
   //const averageStrain = notes.map(e => (e.strain)).reduce((a, b) => a + b) / notes.length;
 
-  let maxTotalStrain = 0;
-  for (let i = 0; i < columns; i++) {
-    const columnNotes = notes.filter(e => e.column == i);
-    const columnTotalStrain = Math.log(1 + columnNotes.map(e => e.strain).reduce((a, b) => a + b, 0) / 200);
-    maxTotalStrain = Math.max(maxTotalStrain, columnTotalStrain);
-  }
-
-  return averageStrain + parameters.TOTAL_STRAIN_FACTOR * maxTotalStrain;
+  return averageStrain;
 }
 
 function calculate(map) {
