@@ -170,7 +170,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
 
 
   const plotStrains = (name, notes) => {
-    const getPlotData = (name) => ({
+    const getPlotData = (name, visible = false) => ({
       x: notes.map(e => new Date(e.time)),
       y: notes.map(e => e[name]),
       mode: 'markers',
@@ -181,10 +181,11 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
         size: 4,
         opacity: 0.5,
       },
+      visible: visible || "legendonly",
     })
 
     const plotData = [
-      getPlotData('strain'),
+      getPlotData('strain', true),
       getPlotData('maxColumn'),
       getPlotData('devColumn'),
       getPlotData('baseStrain'),
@@ -213,6 +214,8 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
   }
 
   const osuUpload = document.getElementById('osu-upload');
+  const difficultyInfo = document.getElementById('difficulty-info');
+
   osuUpload.addEventListener('change', () => {
     const file = osuUpload.files[0];
     const fr = new FileReader();
@@ -233,6 +236,11 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
       difficultyTable.bootstrapTable('append', toTableData([{ ...map, oldRating, newRating }], 'custom'))
 
       plotStrains(metadata, map.notes)
+
+
+      difficultyInfo.innerText = `New SR: ${newRating.toFixed(2)}
+      Old SR: ${oldRating.toFixed(2)}
+      Diff: ${(newRating - oldRating).toFixed(2)}`;
     });
     fr.readAsText(file);
   });
