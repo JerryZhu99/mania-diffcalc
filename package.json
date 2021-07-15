@@ -7,8 +7,11 @@
     "test": "mocha",
     "build": "webpack",
     "watch": "webpack --watch",
-    "calc": "node ."
+    "calc": "node .",
+    "predeploy": "npm run build && npm run calc",
+    "deploy": "gh-pages -d dist"
   },
+  "homepage": "https://jerryzhu99.github.io/mania-diffcalc/",
   "author": "Jerry Zhu",
   "license": "MIT",
   "dependencies": {
@@ -17,6 +20,8 @@
     "webpack": "^5.2.0"
   },
   "devDependencies": {
+    "copy-webpack-plugin": "^9.0.1",
+    "gh-pages": "^3.2.3",
     "mocha": "^8.2.0",
     "webpack-cli": "^4.1.0"
   }

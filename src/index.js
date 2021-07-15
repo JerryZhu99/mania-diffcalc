@@ -14,7 +14,7 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     'ranked-7k',
   ]
 
-  let mapData = await Promise.all(dataSets.map(async e => [await (await fetch(`/output/${e}.json`)).json(), e]));
+  let mapData = await Promise.all(dataSets.map(async e => [await (await fetch(`/data/${e}.json`)).json(), e]));
   mapData.push([[], 'custom'])
 
   const toPlotData = (data, name) => ({

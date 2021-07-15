@@ -17,8 +17,8 @@ const stableDifficulty = require('./src/stable_diffcalc');
     'ranked-7k',
   ]
 
-  if (!existsSync('output')) {
-    await fs.mkdir('output');
+  if (!existsSync('dist/data')) {
+    await fs.mkdir('dist/data');
   }
 
   for (let folder of folders) {
@@ -35,7 +35,7 @@ const stableDifficulty = require('./src/stable_diffcalc');
         newRating: reworkDifficulty.calculateDifficulty(e.columnCount, e.notes, getTimingWindow(e.overallDifficulty)),
       }));
 
-    await fs.writeFile(`output/${folder}.json`, JSON.stringify(results));
+    await fs.writeFile(`dist/data/${folder}.json`, JSON.stringify(results));
   }
 })();
 
