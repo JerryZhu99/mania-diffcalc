@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha",
     "build": "webpack",
-    "watch": "webpack --watch"
+    "watch": "webpack --watch",
+    "calc": "node ."
   },
   "author": "Jerry Zhu",
   "license": "MIT",
