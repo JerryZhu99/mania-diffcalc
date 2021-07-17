@@ -31,9 +31,29 @@
 
     <div id="difficulty-scatter">
     </div>
-    <div class="custom-file">
-      <input type="file" class="custom-file-input" id="osu-upload">
-      <label class="custom-file-label" for="osu-upload">Upload .osu</label>
+    <div class="row">
+      <div class="col-8">
+        <div class="custom-file">
+          <input type="file" class="custom-file-input" id="osu-upload">
+          <label class="custom-file-label" for="osu-upload" id="osu-upload-label">Upload .osu</label>
+        </div>
+      </div>
+      <div class="col-2">
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Rate</span>
+          </div>
+          <input class="form-control" name="rate" type="number" placeholder="1" list="common-rates" id="options-rate">
+          <datalist id="common-rates">
+            <option value="0.75">
+            <option value="1">
+            <option value="1.5">
+          </datalist>
+        </div>
+      </div>
+      <div class="col-2">
+        <button disabled class="btn btn-success btn-block" id="calculate">Calculate!</button>
+      </div>
     </div>
     <div id="difficulty-graph"></div>
     <div id="difficulty-info"></div>

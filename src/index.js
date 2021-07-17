@@ -92,30 +92,9 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
   difficultyTable.bootstrapTable({
     data: tableData,
     search: true,
-    searchTimeOut: 0,
+    searchTimeOut: 500,
     showFullscreen: "true",
     showColumns: "true",
-    buttons: () => ({
-      btnAdd: {
-        text: 'Highlight changes',
-        icon: 'fa-palette',
-        event: () => {
-          highlightRows = !highlightRows;
-          difficultyTable.bootstrapTable('refreshOptions', {
-            rowStyle: (row, index) => {
-              if (!highlightRows) return {};
-              let classes = '';
-              if (row.ratingChange > 1.5) classes = 'table-success';
-              if (row.ratingChange < -1.5) classes = 'table-danger';
-              return { classes };
-            },
-          })
-        },
-        attributes: {
-          title: 'Show star rating changes with colour',
-        },
-      },
-    }),
     columns: [{
       field: 'metadata',
       title: 'Map',
@@ -206,7 +185,14 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
   }
 
   const osuUpload = document.getElementById('osu-upload');
+  const osuUploadLabel = document.getElementById('osu-upload-label');
+  /** @type {HTMLInputElement} */
+  const rateOption = document.getElementById('options-rate');
+  /** @type {HTMLButtonElement} */
+  const calculateButton = document.getElementById('calculate');
   const difficultyInfo = document.getElementById('difficulty-info');
+
+  let selectedMap;
 
   osuUpload.addEventListener('change', () => {
     const file = osuUpload.files[0];
@@ -214,27 +200,43 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     fr.addEventListener('load', () => {
       const rawData = fr.result;
       const map = parseBeatmap(rawData);
-      const oldRating = stableDifficulty.calculateDifficulty(map.columnCount, map.notes);
-      const newRating = reworkDifficulty.calculateDifficulty(map.columnCount, map.notes, getTimingWindow(map.columnCount));
       const metadata = formatMetadata(map.metadata);
-      const customPlot = plotData.find(e => e.name == 'custom');
-
-      customPlot.x.push(oldRating);
-      customPlot.y.push(newRating);
-      customPlot.text.push(metadata);
-
-      Plotly.redraw('difficulty-scatter');
-
-      difficultyTable.bootstrapTable('append', toTableData([{ ...map, oldRating, newRating }], 'custom'))
-
-      plotStrains(metadata, map.notes)
-
-
-      difficultyInfo.innerText = `New SR: ${newRating.toFixed(2)}
-      Old SR: ${oldRating.toFixed(2)}
-      Diff: ${(newRating - oldRating).toFixed(2)}`;
+      osuUploadLabel.innerText = metadata;
+      calculateButton.disabled = false;
+      selectedMap = map;
     });
     fr.readAsText(file);
   });
+
+  calculateButton.addEventListener('click', () => {
+    if (!selectedMap) return;
+    const rate = rateOption.valueAsNumber || 1;
+
+    const map = { ...selectedMap };
+    map.notes = map.notes.map(({ time, endTime, ...rest }) => ({ time: time / rate, endTime: endTime / rate, ...rest }));
+    const oldRating = stableDifficulty.calculateDifficulty(map.columnCount, map.notes);
+    const newRating = reworkDifficulty.calculateDifficulty(map.columnCount, map.notes, getTimingWindow(map.columnCount));
+    let metadata = formatMetadata(map.metadata);
+    if (rate === 1.5) metadata += ' +DT'
+    else if (rate === 0.75) metadata += ' +HT'
+    else if (rate !== 1) metadata += ` ${rate}x`
+
+    const customPlot = plotData.find(e => e.name == 'custom');
+
+    customPlot.x.push(oldRating);
+    customPlot.y.push(newRating);
+    customPlot.text.push(metadata);
+
+    Plotly.redraw('difficulty-scatter');
+
+    difficultyTable.bootstrapTable('append', toTableData([{ ...map, oldRating, newRating }], 'custom'))
+
+    plotStrains(metadata, map.notes)
+
+
+    difficultyInfo.innerText = `New SR: ${newRating.toFixed(2)}
+    Old SR: ${oldRating.toFixed(2)}
+    Diff: ${(newRating - oldRating).toFixed(2)}`;
+  })
 
 })();
