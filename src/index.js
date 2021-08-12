@@ -12,6 +12,8 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     '7k-ln-dans',
     'ranked-4k',
     'ranked-7k',
+    'vibro-dans',
+    'vibro',
   ]
 
   let mapData = await Promise.all(dataSets.map(async e => [await (await fetch(`data/${e}.json`)).json(), e]));

@@ -15,6 +15,8 @@ const stableDifficulty = require('./src/stable_diffcalc');
     '7k-ln-dans',
     'ranked-4k',
     'ranked-7k',
+    'vibro-dans',
+    'vibro',
   ]
 
   if (!existsSync('dist/data')) {
