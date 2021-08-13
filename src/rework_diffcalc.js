@@ -1,10 +1,10 @@
 const { getTimingWindow } = require("./utils");
 
 const parameters = {
-  STRAIN_FACTOR: 0.47,
-  STRAIN_EXPONENT: 1.1,
+  STRAIN_FACTOR: 0.67,
+  STRAIN_EXPONENT: 1.05,
 
-  STAMINA_HALF_LIFE: 4000,
+  STAMINA_HALF_LIFE: 2000,
   STAMINA_STRAIN_FACTOR: 0.5,
 
   LN_SHORT_BONUS: 0.2,
@@ -20,7 +20,7 @@ const parameters = {
   LN_RELEASE_BONUS: 1,
 
   NEIGHBOURHOOD_SIZE: 400,
-  DEVIATION_WEIGHT: 1,
+  DEVIATION_WEIGHT: 0.4,
 };
 
 function preprocessNotes(columns, notes) {
@@ -101,7 +101,7 @@ function calculateStrains(columns, notes, timingWindow) {
     }
 
     const max = Math.max(...columnDensities)
-    const deviation = 2 * Math.sqrt(columnDensities.map(e => e * (max - e)).reduce((a, b) => a + b, 0)) / max;
+    const deviation = columnDensities.map(e => 2 * Math.sqrt(e * (max - e))).reduce((a, b) => a + b, 0) / max;
     const devBonus = 1 + parameters.DEVIATION_WEIGHT * deviation;
     let strain = parameters.STRAIN_FACTOR * devBonus * (max ** parameters.STRAIN_EXPONENT);
 
