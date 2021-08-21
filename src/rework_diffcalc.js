@@ -1,10 +1,10 @@
 const { getTimingWindow } = require("./utils");
 
 const parameters = {
-  STRAIN_FACTOR: 0.67,
-  STRAIN_EXPONENT: 1.05,
+  STRAIN_FACTOR: 0.68,
+  STRAIN_EXPONENT: 1.1,
 
-  STAMINA_HALF_LIFE: 2000,
+  STAMINA_HALF_LIFE: 4000,
   STAMINA_STRAIN_FACTOR: 0.5,
 
   LN_SHORT_BONUS: 0.2,
@@ -20,10 +20,18 @@ const parameters = {
   LN_RELEASE_BONUS: 1,
 
   NEIGHBOURHOOD_SIZE: 400,
-  DEVIATION_WEIGHT: 0.4,
+  DEVIATION_WEIGHT: 0.3,
+
+  WEIGHT_EXPONENT: 4,
 };
 
 function preprocessNotes(columns, notes) {
+  // Per note
+  for (let i = 1; i < notes.length; i++) {
+    notes[i].prev = notes[i - 1];
+    notes[i].delta = notes[i].time - notes[i - 1].time
+  }
+
   // Per finger
   for (let i = 0; i < columns; i++) {
     let columnNotes = notes.filter(e => e.column == i);
@@ -83,8 +91,8 @@ function calculateStrains(columns, notes, timingWindow) {
     let currentNote = notes[i];
 
     let {
-      columnPrev: previousNote,
-      columnNext: nextNote,
+      prev: previousNote,
+      columnNext: columnNextNote,
     } = currentNote;
 
     // Base strain
@@ -132,8 +140,8 @@ function calculateStrains(columns, notes, timingWindow) {
       longNoteFactor = relativeLength * parameters.LN_LONG_BONUS + (1 - relativeLength) * parameters.LN_SHORT_BONUS;
 
       // If the next note is close to the release (shields / inverse)
-      if (nextNote) {
-        const delta = nextNote.time - currentNote.endTime;
+      if (columnNextNote) {
+        const delta = columnNextNote.time - currentNote.endTime;
         const inverseFactor = Math.max(0, 1 - delta / parameters.LN_INVERSE_MIN_THRESHOLD);
         // Only apply inverse buff to long LNs
         longNoteFactor += relativeLength * inverseFactor * parameters.LN_INVERSE_BONUS;
@@ -157,7 +165,8 @@ function calculateDifficulty(columns, notes, timingWindow) {
   calculateStrains(columns, notes.filter(e => e.column >= Math.floor(columns / 2)), timingWindow);
 
   // Weighted average
-  const averageStrain = (notes.map(e => e.strain ** 6).reduce((a, b) => a + b, 0) / notes.length) ** (1 / 6);
+  const averageStrain = (notes.map(e => e.strain ** parameters.WEIGHT_EXPONENT)
+    .reduce((a, b) => a + b, 0) / notes.length) ** (1 / parameters.WEIGHT_EXPONENT);
 
   return averageStrain;
 }

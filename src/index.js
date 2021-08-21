@@ -12,6 +12,8 @@ const { parseBeatmap, getTimingWindow, formatMetadata } = require('./utils');
     '7k-ln-dans',
     'ranked-4k',
     'ranked-7k',
+    'loved-4k',
+    'loved-7k',
     'vibro-dans',
     'vibro',
   ]
