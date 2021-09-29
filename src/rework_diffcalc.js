@@ -1,8 +1,8 @@
 const { getTimingWindow } = require("./utils");
 
 const parameters = {
-  STRAIN_FACTOR: 0.68,
-  STRAIN_EXPONENT: 1.1,
+  STRAIN_FACTOR: 0.65,
+  STRAIN_EXPONENT: 1.15,
 
   STAMINA_HALF_LIFE: 4000,
   STAMINA_STRAIN_FACTOR: 0.5,
@@ -22,7 +22,7 @@ const parameters = {
   NEIGHBOURHOOD_SIZE: 400,
   DEVIATION_WEIGHT: 0.3,
 
-  WEIGHT_EXPONENT: 4,
+  WEIGHT_EXPONENT: 6,
 };
 
 function preprocessNotes(columns, notes) {
@@ -91,7 +91,7 @@ function calculateStrains(columns, notes, timingWindow) {
     let currentNote = notes[i];
 
     let {
-      prev: previousNote,
+      columnPrev: columnPreviousNote,
       columnNext: columnNextNote,
     } = currentNote;
 
@@ -119,9 +119,9 @@ function calculateStrains(columns, notes, timingWindow) {
 
     // Burst stamina
     currentNote.staminaBonus = 0
-    if (previousNote && previousNote.baseStrain) {
-      const timeDiff = currentNote.time - previousNote.time;
-      const currentStaminaStrain = (2 ** (-timeDiff / parameters.STAMINA_HALF_LIFE)) * previousNote.baseStrain;
+    if (columnPreviousNote && columnPreviousNote.baseStrain) {
+      const timeDiff = currentNote.time - columnPreviousNote.time;
+      const currentStaminaStrain = (2 ** (-timeDiff / parameters.STAMINA_HALF_LIFE)) * columnPreviousNote.baseStrain;
       currentNote.staminaBonus += currentStaminaStrain * parameters.STAMINA_STRAIN_FACTOR;
     }
 
